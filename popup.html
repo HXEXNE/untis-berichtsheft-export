@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 420px; max-height: 560px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #333; font-size: 13px; overflow: hidden; display: flex; flex-direction: column;
+}
+.page { display: none; flex-direction: column; padding: 16px; height: 100%; }
+.page.active { display: flex; }
+
+/* Header */
+.header { display: flex; align-items: center; margin-bottom: 12px; }
+.header h2 { font-size: 16px; flex: 1; }
+.gear-btn {
+  width: 28px; height: 28px; border: none; background: none; cursor: pointer;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  color: #999; font-size: 16px; transition: background 0.15s, color 0.15s;
+}
+.gear-btn:hover { background: #f0f0f0; color: #555; }
+
+/* Login */
+label { display: block; font-size: 12px; color: #666; margin-bottom: 3px; }
+input[type="text"], input[type="password"] {
+  width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px;
+  font-size: 13px; margin-bottom: 10px; outline: none;
+}
+input:focus { border-color: #fe6033; }
+.error { background: #fff0f0; color: #c00; padding: 8px 10px; border-radius: 6px; margin-bottom: 10px; font-size: 12px; }
+
+/* Buttons */
+.btn {
+  padding: 9px 16px; border: none; border-radius: 7px; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+.btn-primary { background: #fe6033; color: #fff; flex: 1; }
+.btn-primary:hover { background: #e5552d; }
+.btn-primary:disabled { background: #fdb49e; cursor: wait; }
+.btn-secondary { background: #e8e8e8; color: #333; }
+.btn-secondary:hover { background: #d5d5d5; }
+.btn-small { padding: 5px 12px; font-size: 11px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; }
+.btn-row { display: flex; gap: 6px; margin-top: 12px; }
+
+/* Progress */
+.progress-track { height: 4px; background: #eee; border-radius: 2px; margin: 10px 0; }
+.progress-bar { height: 100%; background: #fe6033; border-radius: 2px; width: 0%; transition: width 0.3s; }
+.status { color: #666; font-size: 12px; }
+
+/* Week list */
+.week-list { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 7px; margin: 8px 0; padding: 4px; }
+.week-item {
+  display: flex; align-items: center; padding: 7px 8px; border-radius: 5px;
+  cursor: pointer; gap: 8px; transition: background 0.1s;
+}
+.week-item:hover { background: #f8f8f8; }
+.week-item input { width: 16px; height: 16px; accent-color: #fe6033; cursor: pointer; }
+.week-item b { font-size: 13px; }
+.week-item span { color: #888; font-size: 12px; }
+.sel-btns { display: flex; gap: 6px; margin-bottom: 6px; }
+
+/* Output */
+.output {
+  flex: 1; min-height: 120px; border: 1px solid #ddd; border-radius: 7px;
+  padding: 12px; font-family: 'Consolas', monospace; font-size: 11px;
+  line-height: 1.5; overflow-y: auto; white-space: pre-wrap; background: #fafafa;
+}
+
+.footer { margin-top: 8px; font-size: 10px; color: #bbb; text-align: center; }
+.footer a { color: #fe6033; text-decoration: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="page-login" class="page">
+  <div class="header">
+    <h2>📋 Berichtsheft Export</h2>
+    <button class="gear-btn" id="gear-login" title="Einstellungen">⚙️</button>
+  </div>
+  <div id="login-error" class="error" style="display:none"></div>
+  <label>Benutzername</label>
+  <input type="text" id="inp-user" />
+  <label>Passwort</label>
+  <input type="password" id="inp-pass" />
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-login">Anmelden & Scannen</button>
+  </div>
+  <div class="footer">Daten werden lokal im Browser gespeichert.</div>
+</div>
+
+<!-- PROGRESS PAGE -->
+<div id="page-progress" class="page">
+  <div class="header">
+    <h2 id="progress-title">Schulwochen suchen</h2>
+  </div>
+  <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+  <div class="status" id="progress-status">Starte...</div>
+</div>
+
+<!-- WEEK SELECTION PAGE -->
+<div id="page-weeks" class="page">
+  <div class="header">
+    <h2>Schulwochen auswählen</h2>
+    <button class="gear-btn" id="gear-weeks" title="Einstellungen">⚙️</button>
+  </div>
+  <div class="status" id="weeks-info"></div>
+  <div class="sel-btns">
+    <button class="btn-small" id="btn-sel-all">Alle</button>
+    <button class="btn-small" id="btn-sel-none">Keine</button>
+  </div>
+  <div class="week-list" id="week-list"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-export">Exportieren</button>
+  </div>
+  <div class="footer"><a id="btn-logout">Abmelden & Daten löschen</a></div>
+</div>
+
+<!-- RESULT PAGE -->
+<div id="page-result" class="page">
+  <div class="header">
+    <h2>Export fertig</h2>
+  </div>
+  <div class="status" id="result-info"></div>
+  <div class="output" id="result-output"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-copy">In Zwischenablage kopieren</button>
+    <button class="btn btn-secondary" id="btn-back">Zurück</button>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

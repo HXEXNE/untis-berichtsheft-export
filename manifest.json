@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Berichtsheft Export",
+  "description": "Exportiert WebUntis-Stundenpläne ins Berichtsheft-Format",
+  "version": "2.1",
+  "permissions": ["storage"],
+  "host_permissions": ["https://*.webuntis.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Berichtsheft Export"
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
